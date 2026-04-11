@@ -32,7 +32,7 @@ This application is orchestrated as a fully-typed **Turborepo** Monorepo separat
 
 | Layer | Technology | Purpose |
 | ---- | ---- | ---- |
-| **Frontend Platform** | Next.js 14, React Flow, Zustand | Handles canvas interactions, floating tools, and global application state. |
+| **Frontend Platform** | Next.js 16, React Flow, Zustand | Handles canvas interactions, floating tools, and global application state. |
 | **Backend API** | NestJS, Socket.IO | Provides REST endpoints and stateful WebSocket gateways for simulations and multi-clients. |
 | **Messaging** | Redis Pub/Sub | Cross-coordinates WebSocket states efficiently between concurrent node instances. |
 | **Database** | PostgreSQL | Containerized via Docker storing persistent graphs and users. |
