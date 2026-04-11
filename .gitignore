@@ -1,0 +1,9 @@
+node_modules
+.env
+DNTV_PRD.docx
+prd.md
+.next
+.turbo
+.wrangler
+.npm    
+prd.md

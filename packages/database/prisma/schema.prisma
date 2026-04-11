@@ -1,0 +1,43 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+}
+
+model User {
+    id         String     @id @default(cuid())
+    email      String     @unique
+    name       String?
+    createdAt  DateTime   @default(now())
+    updatedAt  DateTime   @updatedAt
+    topologies Topology[]
+    sessions   Session[]
+}
+
+model Topology {
+    id        String    @id @default(cuid())
+    name      String
+    ownerId   String
+    owner     User      @relation(fields: [ownerId], references: [id])
+    nodes     Json // NodeDTO[]
+    links     Json // LinkDTO[]
+    subnets   Json // SubnetDTO[]
+    simConfig Json? // SimulationConfig
+    isPublic  Boolean   @default(false)
+    createdAt DateTime  @default(now())
+    updatedAt DateTime  @updatedAt
+    sessions  Session[]
+}
+
+model Session {
+    id         String   @id @default(cuid())
+    topologyId String
+    topology   Topology @relation(fields: [topologyId], references: [id])
+    ownerId    String
+    owner      User     @relation(fields: [ownerId], references: [id])
+    active     Boolean  @default(true)
+    createdAt  DateTime @default(now())
+    updatedAt  DateTime @updatedAt
+}
