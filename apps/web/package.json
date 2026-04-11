@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "fuser -k 3000/tcp || true",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
@@ -13,6 +14,7 @@
     "@xyflow/react": "^12.4.3",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",
+    "html-to-image": "^1.11.13",
     "immer": "^10.1.1",
     "lucide-react": "^0.479.0",
     "next": "16.2.1",

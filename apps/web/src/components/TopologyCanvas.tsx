@@ -22,6 +22,9 @@ import HostNode from './nodes/HostNode';
 import HubNode from './nodes/HubNode';
 import NodeDrawer from './NodeDrawer';
 import RemoteCursors from './RemoteCursors';
+import SimulationToolbar from './SimulationToolbar';
+import ExportToolbar from './ExportToolbar';
+import IpCalculator from './IpCalculator';
 import { useTopologyStore } from '../store/useTopologyStore';
 import { useSocket } from '../hooks/useSocket';
 
@@ -49,6 +52,13 @@ export default function TopologyCanvas() {
   const userId = React.useMemo(() => Math.random().toString(36).substring(7), []);
   const { socket, isConnected } = useSocket(topologyId);
   const [remoteCursors, setRemoteCursors] = React.useState<any[]>([]);
+  const [activeNodeId, setActiveNodeId] = React.useState<string | null>(null);
+  const [sourceId, setSourceId] = React.useState<string | null>(null);
+  const [destId, setDestId] = React.useState<string | null>(null);
+  const [mode, setMode] = React.useState<'source' | 'dest' | null>(null);
+  const [isSimulating, setIsSimulating] = React.useState(false);
+  const [blockedEdges, setBlockedEdges] = React.useState<string[]>([]);
+  const [collisionNodeId, setCollisionNodeId] = React.useState<string | null>(null);
 
   const { setSelectedNode, selectedNode: storeSelectedNode } = useTopologyStore();
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes as any);
@@ -61,9 +71,17 @@ export default function TopologyCanvas() {
 
   const onNodeClick = useCallback(
     (_: React.MouseEvent, node: any) => {
-      setSelectedNode(node);
+      if (mode === 'source') {
+        setSourceId(node.id);
+        setMode(null);
+      } else if (mode === 'dest') {
+        setDestId(node.id);
+        setMode(null);
+      } else {
+        setSelectedNode(node);
+      }
     },
-    [setSelectedNode]
+    [mode, setSelectedNode]
   );
 
   const onNodeDrag = useCallback(
@@ -123,12 +141,63 @@ export default function TopologyCanvas() {
       });
     });
 
+    socket.on('simulation:packet-hop', (payload) => {
+      setIsSimulating(true);
+      setActiveNodeId(payload.nodeId);
+      if (payload.isLast) {
+        setTimeout(() => {
+          setIsSimulating(false);
+          setActiveNodeId(null);
+        }, 1000);
+      }
+    });
+
+    socket.on('simulation:stp-update', (payload) => {
+      setBlockedEdges(payload.blockedEdges || []);
+    });
+
+    socket.on('simulation:collision', (payload) => {
+      setCollisionNodeId(payload.nodeId);
+      setTimeout(() => {
+        setCollisionNodeId(null);
+      }, 800);
+    });
+
+    socket.on('simulation:error', (payload) => {
+      alert(payload.message);
+      setIsSimulating(false);
+    });
+
     return () => {
       socket.off('node:move');
       socket.off('node:update');
       socket.off('cursor:move');
+      socket.off('simulation:packet-hop');
+      socket.off('simulation:stp-update');
+      socket.off('simulation:collision');
+      socket.off('simulation:error');
     };
   }, [socket, setNodes]);
+
+  const onStartSimulation = useCallback(() => {
+    if (socket && sourceId && destId) {
+      setIsSimulating(true);
+      socket.emit('simulation:start', {
+        topologyId,
+        startNodeId: sourceId,
+        endNodeId: destId,
+        nodes,
+        edges,
+      });
+    }
+  }, [socket, sourceId, destId, nodes, edges, topologyId]);
+
+  const onResetSimulation = useCallback(() => {
+    setSourceId(null);
+    setDestId(null);
+    setActiveNodeId(null);
+    setIsSimulating(false);
+  }, []);
 
   // Sync store updates through socket
   React.useEffect(() => {
@@ -161,9 +230,36 @@ export default function TopologyCanvas() {
           {isConnected ? '● SYNC ON' : '○ OFFLINE'}
         </div>
       </div>
+
+      <SimulationToolbar
+        onStart={onStartSimulation}
+        onReset={onResetSimulation}
+        sourceId={sourceId}
+        destId={destId}
+        isSimulating={isSimulating}
+        setMode={setMode}
+        mode={mode}
+      />
+
+      <ExportToolbar nodes={nodes} edges={edges} topologyId={topologyId} />
+      <IpCalculator />
+
       <ReactFlow
-        nodes={nodes}
-        edges={edges}
+        nodes={nodes.map((n) => ({
+          ...n,
+          data: {
+            ...n.data,
+            isActive: n.id === activeNodeId,
+            isSource: n.id === sourceId,
+            isDest: n.id === destId,
+            isCollision: n.id === collisionNodeId,
+          },
+        }))}
+        edges={edges.map((e) => ({
+          ...e,
+          style: blockedEdges.includes(e.id) ? { stroke: '#ef4444', strokeWidth: 2, strokeDasharray: '5 5' } : undefined,
+          animated: !blockedEdges.includes(e.id),
+        }))}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}

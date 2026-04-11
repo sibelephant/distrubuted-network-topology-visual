@@ -1,6 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { prisma } from '@dntv/database';
-import { Prisma } from '@prisma/client';
+import { prisma, Prisma } from '@dntv/database';
 
 @Injectable()
 export class TopologyService {

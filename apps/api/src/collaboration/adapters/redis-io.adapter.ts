@@ -13,8 +13,6 @@ export class RedisIoAdapter extends IoAdapter {
     });
     const subClient = pubClient.duplicate();
 
-    await Promise.all([pubClient.connect(), subClient.connect()]);
-
     this.adapterConstructor = createAdapter(pubClient, subClient);
   }
 
