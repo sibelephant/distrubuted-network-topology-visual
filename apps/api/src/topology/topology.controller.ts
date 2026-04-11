@@ -6,16 +6,21 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { TopologyService } from './topology.service';
+import { CreateTopologyDto } from './dto/create-topology.dto';
+import { UpdateTopologyDto } from './dto/update-topology.dto';
+import { AuthGuard } from '../common/guards/auth.guard';
 
 @Controller('topology')
 export class TopologyController {
   constructor(private readonly topologyService: TopologyService) {}
 
   @Post()
-  create(@Body() createTopologyDto: any) {
-    return this.topologyService.create(createTopologyDto);
+  @UseGuards(AuthGuard)
+  create(@Body() createTopologyDto: CreateTopologyDto) {
+    return this.topologyService.create(createTopologyDto as any);
   }
 
   @Get()
@@ -29,11 +34,13 @@ export class TopologyController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTopologyDto: any) {
-    return this.topologyService.update(id, updateTopologyDto);
+  @UseGuards(AuthGuard)
+  update(@Param('id') id: string, @Body() updateTopologyDto: UpdateTopologyDto) {
+    return this.topologyService.update(id, updateTopologyDto as any);
   }
 
   @Delete(':id')
+  @UseGuards(AuthGuard)
   remove(@Param('id') id: string) {
     return this.topologyService.remove(id);
   }
