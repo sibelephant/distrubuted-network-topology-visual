@@ -45,7 +45,7 @@ This application is orchestrated as a fully-typed **Turborepo** Monorepo separat
 ### 1. Requirements
 - **Node.js**: `v22+`
 - **Docker Compose**: Running locally to handle the database layer.
-- **NPM Package Manager**
+- **pnpm Package Manager**
 
 ### 2. Bootstrapping the Backend (Docker)
 The required Redis and PostgreSQL clusters run seamlessly out-of-the-box locally.
@@ -56,22 +56,22 @@ docker compose up -d
 
 ### 3. Install Dependencies
 ```bash
-# Pull down all necessary monorepo workspace dependencies via NPM
-npm install
+# Pull down all necessary monorepo workspace dependencies via pnpm
+pnpm install
 ```
 
 ### 4. Push Database Schemas
 You need to generate the Prisma clients and push your schemas before running for the first time.
 ```bash
-npm run db:push --workspace=@dntv/database
-npm run db:generate --workspace=@dntv/database
+pnpm --filter @dntv/database db:push
+pnpm --filter @dntv/database db:generate
 ```
 
 ### 5. Launch both Servers (Web + API)
 With `Turborepo` firmly configured, you can launch both environments effortlessly in one terminal.
 ```bash
 # Launches both Next.js and NestJS workspaces in parallel
-npm run dev
+pnpm dev
 ```
 
 ### 6. Access Application

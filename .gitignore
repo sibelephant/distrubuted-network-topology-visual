@@ -6,4 +6,6 @@ prd.md
 .turbo
 .wrangler
 .npm    
+pnpm-debug.log*
+.pnpm-store
 prd.md

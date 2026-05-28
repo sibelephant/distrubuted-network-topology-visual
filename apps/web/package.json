@@ -10,7 +10,7 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@dntv/database": "*",
+    "@dntv/database": "workspace:*",
     "@xyflow/react": "^12.4.3",
     "clsx": "^2.1.1",
     "d3": "^7.9.0",

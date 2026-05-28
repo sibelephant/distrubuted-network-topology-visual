@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "packageManager": "npm@11.5.2",
+  "packageManager": "pnpm@9.15.4",
   "scripts": {
     "dev": "turbo run dev",
     "build": "turbo run build",
@@ -23,5 +23,15 @@
   },
   "overrides": {
     "glob": "^13.0.6"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@prisma/engines",
+      "@nestjs/core",
+      "@swc/core",
+      "prisma",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
